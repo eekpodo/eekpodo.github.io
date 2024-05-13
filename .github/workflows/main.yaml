@@ -1,16 +1,32 @@
-- name: Install chrome and Firefox
-  run: |
-    sudo apt install google-chrome-stable
-    sudo apt-get install firefox
-- name: Install chromedriver and geckodriver (Firefox Webdriver)
-  run: |
-    seleniumbase install chromedriver
-    seleniumbase install geckodriver
-- name: Make sure pytest is working
-  run: |
-    echo "def test_1(): pass" > nothing.py
-    pytest nothing.py
-- name: Run pytest boilerplate_test.py --browser=chrome --headless
-  run: |
-      pytest examples/boilerplates/boilerplate_test.py --browser=chrome --headless -v -s --junit-xml=junit/test-results.xml
+name: Seleniumbase Tests
 
+on: [push, pull_request]
+
+jobs:
+  selenium-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install seleniumbase
+
+    - name: Download browser driver (e.g., ChromeDriver)
+      run: |
+        CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+        wget -q -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip
+        sudo unzip -o /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
+        sudo chmod +x /usr/local/bin/chromedriver
+
+    - name: Run Seleniumbase tests
+      run: |
+        pytest path/to/your/seleniumbase_tests.py
