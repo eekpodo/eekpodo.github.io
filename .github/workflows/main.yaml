@@ -1,4 +1,4 @@
-- name : Install chrome and Firefox
+- name: Install chrome and Firefox
   run: |
     sudo apt install google-chrome-stable
     sudo apt-get install firefox
